@@ -9,8 +9,8 @@ let userMessage = null;
 let isResponseGenerating = false;
 
 // API configuration
-const API_KEY = "PASTE-YOUR-API-KEY"; // Your API key here
-const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
+const API_KEY = "AIzaSyA4rhlUkLDIlBsBOfb9oUOTnqGvUPP7__w"; // Your API key here
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 // Load theme and chat data from local storage on page load
 const loadDataFromLocalstorage = () => {
@@ -67,15 +67,18 @@ const generateAPIResponse = async (incomingMessageDiv) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        contents: [{ 
+        inputs: [{ 
           role: "user", 
-          parts: [{ text: userMessage }] 
+          content: userMessage 
         }] 
       }),
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error.message);
+    if (!response.ok) {
+      console.error("API Error:", data.error);
+      throw new Error(data.error.message);
+    }
 
     // Get the API response text and remove asterisks from it
     const apiResponse = data?.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, '$1');
@@ -120,13 +123,13 @@ const copyMessage = (copyButton) => {
 
 // Handle sending outgoing chat messages
 const handleOutgoingChat = () => {
-  userMessage = typingForm.querySelector(".typing-input").value.trim() || userMessage;
-  if(!userMessage || isResponseGenerating) return; // Exit if there is no message or response is generating
+  userMessage = typingForm.querySelector(".typing-input").value.trim();
+  if (!userMessage || isResponseGenerating) return; // Exit if there is no message or response is generating
 
   isResponseGenerating = true;
 
   const html = `<div class="message-content">
-                  <img class="avatar" src="images/user.jpg" alt="User avatar">
+                  <img class="avatar" src="images/user.jpg" alt="User  avatar">
                   <p class="text"></p>
                 </div>`;
 
