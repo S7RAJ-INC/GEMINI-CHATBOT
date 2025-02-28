@@ -9,8 +9,8 @@ let userMessage = null;
 let isResponseGenerating = false;
 
 // API configuration
-const API_KEY = "API_HERE"; // Your API key here
-const API_URL = `APU_URL`;
+const API_KEY = "API-KEY-HERE"; // Your API key here
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=GEMINI_API_KEY`;
 
 // Load theme and chat data from local storage on page load
 const loadDataFromLocalstorage = () => {
@@ -62,26 +62,30 @@ const generateAPIResponse = async (incomingMessageDiv) => {
   const textElement = incomingMessageDiv.querySelector(".text"); // Getting text element
 
   try {
+    // Log the user message for debugging
+    console.log("User  Message:", userMessage);
+
     // Send a POST request to the API with the user's message
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        inputs: [{ 
-          role: "user", 
-          content: userMessage 
-        }] 
+        // Adjusted the payload structure based on the API requirements
+        prompt: userMessage, // Assuming the API expects a "prompt" field
+        maxTokens: 100, // Example additional parameter, adjust as needed
       }),
     });
 
-    const data = await response.json();
+    // Check if the response is ok
     if (!response.ok) {
-      console.error("API Error:", data.error);
-      throw new Error(data.error.message);
+      const errorData = await response.json();
+      console.error("API Error:", errorData);
+      throw new Error(errorData.error.message || "Unknown error occurred");
     }
 
+    const data = await response.json();
     // Get the API response text and remove asterisks from it
-    const apiResponse = data?.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, '$1');
+    const apiResponse = data?.candidates[0]?.content?.parts[0]?.text.replace(/\*\*(.*?)\*\*/g, '$1');
     showTypingEffect(apiResponse, textElement, incomingMessageDiv); // Show typing effect
   } catch (error) { // Handle error
     isResponseGenerating = false;
@@ -172,4 +176,5 @@ typingForm.addEventListener("submit", (e) => {
   handleOutgoingChat();
 });
 
+// Load data from local storage on page load
 loadDataFromLocalstorage();
